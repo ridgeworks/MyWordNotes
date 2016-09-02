@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <title>MyWord Notes</title>
+  <script src="https://npmcdn.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+  <script src="utils.js"></script>
+  <script src="mywordnotes.js"></script>
+  <script src="lib/x-markup.js"></script>
+</head>
+<body>
+    <h2>MyWord Notes</h2>
+	<!--table>
+		<tr>
+			<td style='vertical-align:top; width:20%'><div id="files"></div></td>
+			<td style='vertical-align:top;'><div id='rendered' style='height:500px; overflow:auto;'></div></td>
+		</tr>
+		<tr>
+			<td display=none style='width:20%'></td>
+			<td style='vertical-align:top; background:whitesmoke; border:thin solid grey;'>
+				<div id='filecontents' style='height:500px; overflow:auto; white-space:pre-wrap; font-family:monospace;'></div>
+			</td>
+		</tr>
+	</table-->
+	<table>
+		<tr><td style='vertical-align:top; width:20%;'><table>
+				<tr>
+					<td><div id="files"></div></td>
+				</tr>
+				<tr>
+					<td><br/>
+						<button onclick='mywordnotes.control(this)'>+</button>
+						<button onclick='mywordnotes.control(this)'>-</button>
+						<button id='edit_done' onclick='mywordnotes.control(this)'>Edit</button>
+						<button id='save' style='display:none;' onclick='mywordnotes.control(this)'>Save</button>
+					</td>
+				</tr>
+			</table>
+			</td>
+			<td style='vertical-align:top;'><table>
+				<tr>
+					<td><div id='rendered' style='height:600px; min-height:300px; min-width:400px; overflow:auto;'></div></td>
+				</tr>
+				<tr>
+					<td style='vertical-align:top; background:whitesmoke; border:thin solid grey; display:none;'>
+						<div id='filecontents' contentEditable style='height:300px; min-width:600px; overflow:auto; white-space:pre-wrap; font-family:monospace;'></div>
+
+					</td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+	</table>
+
+	<style> 
+		button.filebutton {
+			display: block; border:none; cursor: pointer;
+			background-color:white; color:blue; 
+			font-size: 14px; font-family: monospace; text-decoration: underline; 
+		}
+		#filecontents:focus {outline:none; background:lightyellow}
+	</style>	
+  <script>
+	mywordnotes.FILES = document.getElementById('files')
+	mywordnotes.SRC = document.getElementById('filecontents')
+	mywordnotes.RENDER = document.getElementById('rendered')
+	mywordnotes.EDIT_DONE = document.getElementById('edit_done')
+	mywordnotes.SAVE = document.getElementById('save')
+	mywordnotes.init(new Dropbox({ accessToken: utils.parseQueryString(window.location.hash).access_token }))
+  </script>
+</body>
+</html>
