@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+    <title>MyWord Notes</title>
+    <script src="https://npmcdn.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+</head>
+<body>
+<script>
+    (function () {
+        var CLIENT_ID = 'xfqmijbebxj0c74'		//MyWordNotes
+        var REDIRECT_URI = 'https://ridgeworks.github.io/MyWordNotes/mywordnotes.html'
+        // Set the login anchors href using dbx.getAuthenticationUrl()
+        var dbx = new Dropbox({ clientId: CLIENT_ID })
+        document.location.href = dbx.getAuthenticationUrl(REDIRECT_URI)
+    })()
+</script>
+</body>
+</html>
