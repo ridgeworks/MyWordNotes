@@ -90,8 +90,9 @@
 	}
 		
 	function select(button) {
-		if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = 'white'
+		if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = mywordnotes.deselectColor
 		mywordnotes.selected = button
+		mywordnotes.deselectColor = button.style.backgroundColor
 		button.style.backgroundColor = 'lightBlue'	
 	}
 
