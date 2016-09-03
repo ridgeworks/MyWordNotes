@@ -51,12 +51,34 @@
 		</tr>
 	</table>
 
-	<style> 
+	<style>
+		body {
+			font-family: 'Helvetica Neue', Helvetica, Arial, serif;
+			font-size: 1em;
+			line-height: 1.5;
+			color: #6d6d6d;
+			text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+			background: #e7e7e7;
+		}
 		button.filebutton {
 			display: block; border:none; cursor: pointer;
-			background-color:white; color:blue; 
-			font-size: 14px; font-family: monospace; text-decoration: underline; 
+			background-color:#e7e7e7; color:blue;
+			font-size: 1em; font-family: monospace; text-decoration: underline;
 		}
+		button.control {
+			color: #606060;
+			background-color:#e7e7e7;
+			font-weight: bold;
+			padding: 2px 8px 2px 8px;
+			margin-right: 8px;
+			border-top: solid 1px #cbcbcb;
+			border-right: solid 1px #b7b7b7;
+			border-bottom: solid 1px #b3b3b3;
+			border-left: solid 1px #b7b7b7;
+			border-radius: 5px;
+
+		}
+		button.control:disabled {color: #a0a0a0;}
 		#filecontents:focus {outline:none; background:lightyellow}
 	</style>	
   <script>
