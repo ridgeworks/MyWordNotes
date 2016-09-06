@@ -17,30 +17,40 @@
 
 	mywordnotes.control = function(button) {
 		//console.log('mywordnotes.control:',button.textContent)
-		switch (button.textContent){
-			case '+': 
+		removeInput()
+		switch (button.textContent) {
+			case '+':
 				var input = document.createElement('input')
 				input.setAttribute('type', 'text')
 				input.setAttribute('size', '40')
 				input.setAttribute('value', 'Untitled..')
 				input.setAttribute('style', 'font-family:monospace; font-size: 14px')
+				input.id = 'inputfilename'
 				input.addEventListener('change', addFile)
+				//input.addEventListener('cancel', function() {
+				//	mywordnotes.FILES.parentNode.removeChild(input)
+				//})
 				mywordnotes.FILES.appendChild(input)
+				deselect()
+				input.select()
 				break
-			case '-': 
-				var path = '/' + mywordnotes.selected.getAttribute('name')
-				mywordnotes.dbx.filesDelete({path: path})
-				.then(function(response) {
-					console.log('Delete', path, 'succeeded.')
-					mywordnotes.FILES.removeChild(mywordnotes.selected)	
-					editDone()
-					mywordnotes.RENDER.innerHTML = ''
-				})
-				.catch(function(error) {
-					var msg = 'Delete' + path + 'failed: ' + JSON.stringify(error)
-					console.error(msg)
-				  	alert(msg)
-				});			
+			case '-':
+				if (mywordnotes.selected) {
+					var path = '/' + mywordnotes.selected.getAttribute('name')
+					mywordnotes.dbx.filesDelete({ path: path })
+						.then(function (response) {
+							console.log('Delete', path, 'succeeded.')
+							mywordnotes.FILES.removeChild(mywordnotes.selected)
+							editDone()
+							mywordnotes.RENDER.innerHTML = ''
+							mywordnotes.selected = null
+						})
+						.catch(function (error) {
+							var msg = 'Delete' + path + 'failed: ' + JSON.stringify(error)
+							console.error(msg)
+							alert(msg)
+						});
+				}
 				break
 			case 'Edit': 
 				if (mywordnotes.selected) {
@@ -75,8 +85,8 @@
 	function keystroke(event) { // replace tab functionality
 	  mywordnotes.SAVE.disabled = false
 	  if (event.keyCode == 9 || event.which == 9) {
-		document.execCommand('insertText', false, '\t')
-		event.preventDefault()
+			document.execCommand('insertText', false, '\t')
+			event.preventDefault()
 	  } else event.stopPropagation()
 	  return false    // don't lose focus
 	}
@@ -87,13 +97,26 @@
 		mywordnotes.SAVE.style.display = 'inline'
 		mywordnotes.SAVE.disabled = true
 		mywordnotes.EDIT_DONE.textContent = 'Done'
+		mywordnotes.SRC.focus()
 	}
 		
 	function select(button) {
-		if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = mywordnotes.deselectColor
+		removeInput()
+		deselect()
 		mywordnotes.selected = button
 		mywordnotes.deselectColor = button.style.backgroundColor
 		button.style.backgroundColor = 'lightBlue'	
+	}
+
+	function deselect() {
+		if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = mywordnotes.deselectColor
+		mywordnotes.selected = null
+		mywordnotes.RENDER.innerHTML = ''
+	}
+
+	function removeInput() {
+		var input = document.getElementById('inputfilename')
+		if (input) mywordnotes.FILES.removeChild(input)
 	}
 
 	function editDone()	{
@@ -148,12 +171,18 @@
 	}
 	
 	function addFile() {
-		var newButton = fileButton(this.value + '.myw')
-		mywordnotes.FILES.replaceChild(newButton, this)
-		select(newButton)
-		mywordnotes.RENDER.style.height = '300px'
-		edit('')
-		saveFile(true)
+		var newName = this.value + '.myw'
+		if (mywordnotes.FILES.querySelector('button[name="' + newName + '"]')) {
+			alert(this.value + ' already exists. Choose a different name.')
+			this.focus()
+		} else {
+			var newButton = fileButton(newName)
+			mywordnotes.FILES.replaceChild(newButton, this)
+			select(newButton)
+			mywordnotes.RENDER.style.height = '300px'
+			edit('')
+			saveFile(true)
+		}
 	}
 	
 	function saveFile(updateList) {
@@ -173,6 +202,7 @@
 			else 
 				mywordnotes.RENDER.innerHTML = ''
 			mywordnotes.SAVE.disabled = true
+			mywordnotes.SRC.focus()
 		})
 		.catch(function(error) {
 			var msg = 'Save' + arg.path + 'failed: ' + JSON.stringify(error)
