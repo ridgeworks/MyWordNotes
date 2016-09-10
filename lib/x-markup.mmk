@@ -184,7 +184,7 @@ demo    :: (content) => "<tr><td class='A1'>" +
     }
 
     .eg, table.demo {
-        margin:5pt;
+        margin:5pt 0pt;
     }
 
     table.demo td.A1 {
@@ -194,6 +194,4 @@ demo    :: (content) => "<tr><td class='A1'>" +
     table.demo td.B1 {
         overflow:hidden; vertical-align:top;
     }
-
-// TODO unused? @css  .pre { margin-left:20pt; }
 

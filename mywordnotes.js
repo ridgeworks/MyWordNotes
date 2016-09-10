@@ -1,18 +1,51 @@
 (function () {
 	window.mywordnotes = {}
-	/* elements set externally from main host HTML file
+	/* elements defined externally from main host HTML file
 	mywordnotes.FILES
 	mywordnotes.SRC
 	mywordnotes.RENDER
 	mywordnotes.EDIT_DONE
 	mywordnotes.SAVE
 	*/
-	
-	mywordnotes.init = function(dbx) {
-		mywordnotes.dbx = dbx
+
+	mywordnotes.init = function(ids, accessToken) {
+		for (key in ids)	// id's indexed by key (list above)
+			mywordnotes[key] = document.getElementById(ids[key])
+		mywordnotes.dbx = new Dropbox({ accessToken: accessToken })
 		mywordnotes.selected = null
 		mywordnotes.SRC.addEventListener('keydown', keystroke)
+		mywordnotes.SRC.addEventListener('input', function() {
+			mywordnotes.SAVE.disabled = false
+		})
+		mywordnotes.renderObserver = new MutationObserver(function(mutations, observer) {
+			if (typeof observer.scrollTop === 'number')	// restore scrollTop
+				setScrollTop()
+			observer.disconnect()		// and disconnect
+		})
 		setFilelist()
+
+		function keystroke(event) { // replace tab functionality
+			if ((event.metaKey || event.ctrlKey) && (event.keyCode === 83)) {		// command S?
+				event.preventDefault()
+				if (! mywordnotes.SAVE.disabled) {
+					saveFile(false)
+					return false
+				}
+			} else if (event.keyCode === 9 || event.which === 9) {
+				event.preventDefault()
+				document.execCommand('insertText', false, '\t')
+			} else  event.stopPropagation()
+			return false    // don't lose focus
+		}
+
+		function setScrollTop() {
+			mywordnotes.RENDER.scrollTop = mywordnotes.renderObserver.scrollTop
+			// Need to poll until render done?
+			if (mywordnotes.RENDER.scrollTop !== mywordnotes.renderObserver.scrollTop) {
+				setTimeout(setScrollTop, 100)
+			}
+		}
+
 	}
 
 	mywordnotes.control = function(button) {
@@ -39,7 +72,7 @@
 					var path = '/' + mywordnotes.selected.getAttribute('name')
 					mywordnotes.dbx.filesDelete({ path: path })
 						.then(function (response) {
-							console.log('Delete', path, 'succeeded.')
+							//console.log('Delete', path, 'succeeded.')
 							mywordnotes.FILES.removeChild(mywordnotes.selected)
 							editDone()
 							mywordnotes.RENDER.innerHTML = ''
@@ -54,8 +87,7 @@
 				break
 			case 'Edit': 
 				if (mywordnotes.selected) {
-					mywordnotes.RENDER.style.height = '300px'
-					var path = '/' + mywordnotes.selected.getAttribute('name')					
+					var path = '/' + mywordnotes.selected.getAttribute('name')
 					filesDownload(path, edit)
 				}
 				break
@@ -76,28 +108,24 @@
 		button.addEventListener('click', function() {
 			select(this)
 			editDone()
+			mywordnotes.SRC.innerHTML=''
 			renderRefresh()
 		})
 		button.innerHTML = name.substr(0, name.length-4)
 		return button
 	}
 
-	function keystroke(event) { // replace tab functionality
-	  mywordnotes.SAVE.disabled = false
-	  if (event.keyCode == 9 || event.which == 9) {
-			document.execCommand('insertText', false, '\t')
-			event.preventDefault()
-	  } else event.stopPropagation()
-	  return false    // don't lose focus
-	}
-
 	function edit(contents) {
+		var height = mywordnotes.RENDER.clientHeight
+		var srcheight = Math.round(height/3)
+		mywordnotes.SRC.style.height = srcheight + 'px'
+		mywordnotes.RENDER.style.height = (height - srcheight) + 'px'
 		mywordnotes.SRC.innerText = contents
-		mywordnotes.SRC.parentElement.style.display = 'block'
+		mywordnotes.SRC.style.display = 'block'
+		mywordnotes.SRC.scrollTop = 0
 		mywordnotes.SAVE.style.display = 'inline'
-		mywordnotes.SAVE.disabled = true
 		mywordnotes.EDIT_DONE.textContent = 'Done'
-		mywordnotes.SRC.focus()
+		editSource()
 	}
 		
 	function select(button) {
@@ -119,30 +147,27 @@
 		if (input) mywordnotes.FILES.removeChild(input)
 	}
 
+	function editSource() {
+		mywordnotes.SAVE.disabled = true
+		mywordnotes.SRC.focus()
+	}
+
 	function editDone()	{
-		mywordnotes.SRC.parentElement.style.display = 'none'
-		mywordnotes.RENDER.style.height = '600px'
+		mywordnotes.RENDER.style.height = (mywordnotes.RENDER.clientHeight + mywordnotes.SRC.clientHeight) + 'px'
+		mywordnotes.SRC.style.height = '0px'
+		mywordnotes.SRC.style.display = 'none'
 		mywordnotes.SAVE.style.display = 'none'
 		mywordnotes.EDIT_DONE.textContent = 'Edit'
 	}
 	
 	function renderRefresh() {
+		// enable observer to update scrollTop
+		mywordnotes.renderObserver.scrollTop = mywordnotes.RENDER.scrollTop
+		mywordnotes.renderObserver.observe(mywordnotes.RENDER, {subtree: true, childList:true, characterData: true})
 		// use include transform to support relative URLS
-		mywordnotes.RENDER.textContent = 
+		mywordnotes.RENDER.textContent =
 			'dropbox://' + mywordnotes.dbx.accessToken + '/' + mywordnotes.selected.getAttribute('name')
 		x_markup.transformElement('include', mywordnotes.RENDER)
-		/*
-		mywordnotes.dbx.sharingCreateSharedLinkWithSettings({path: '/' + mywordnotes.selected.getAttribute('name')})
-		.then(function(response) {
-			console.log(response.url)
-			mywordnotes.RENDER.textContent = response.url
-				//'dropbox://' + mywordnotes.dbx.accessToken + '/' + mywordnotes.selected.getAttribute('name')
-			x_markup.transformElement('include', mywordnotes.RENDER)
-		})
-		.catch(function(error) {
-			//mywordnotes.RENDER.innerHTML = ['<mark>CreateSharedLink error', error, '</mark>'].join('')
-			console.log(error)
-		})*/
 	}
 
 	function setFilelist() {
@@ -179,7 +204,6 @@
 			var newButton = fileButton(newName)
 			mywordnotes.FILES.replaceChild(newButton, this)
 			select(newButton)
-			mywordnotes.RENDER.style.height = '300px'
 			edit('')
 			saveFile(true)
 		}
@@ -195,14 +219,14 @@
 		}
 		mywordnotes.dbx.filesUpload(arg)
 		.then(function(response) {
-			console.log('Save', arg.path, 'succeeded.')
+			// console.log('Save', arg.path, 'succeeded.')
 			if (contents)
 				renderRefresh()		// something to render
-				if (updateList) setFilelist()
+			if (updateList)
+				setFilelist()
 			else 
 				mywordnotes.RENDER.innerHTML = ''
-			mywordnotes.SAVE.disabled = true
-			mywordnotes.SRC.focus()
+			editSource()
 		})
 		.catch(function(error) {
 			var msg = 'Save' + arg.path + 'failed: ' + JSON.stringify(error)
@@ -233,24 +257,3 @@
 	}
 
 }())
-		/*mywordnotes.dbx.filesDownload({path: '/'+path})	// picky dropbox wants '/'?
-				.then(function(response) {
-					//console.log(response.fileBlob)
-					var reader = new FileReader()
-					reader.onloadend = function() {
-						//console.log(reader.result)
-						mywordnotes.SRC.innerText = reader.result
-						if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = 'white'
-						mywordnotes.selected = target
-						mywordnotes.selected.style.backgroundColor = 'lightBlue'
-						var toRender = mywordnotes.RENDER
-						toRender.textContent = reader.result
-						x_markup.transformElement('myword', toRender)
-					}
-					reader.readAsText(response.fileBlob)
-				})
-				.catch(function(error) {
-				  console.log(error);
-				});
-				*/
-		//console.log(path,' :\n',contents)
