@@ -75,7 +75,7 @@
 							//console.log('Delete', path, 'succeeded.')
 							mywordnotes.FILES.removeChild(mywordnotes.selected)
 							editDone()
-							mywordnotes.RENDER.innerHTML = ''
+							renderClear()
 							mywordnotes.selected = null
 						})
 						.catch(function (error) {
@@ -139,7 +139,7 @@
 	function deselect() {
 		if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = mywordnotes.deselectColor
 		mywordnotes.selected = null
-		mywordnotes.RENDER.innerHTML = ''
+		renderClear()
 	}
 
 	function removeInput() {
@@ -159,7 +159,13 @@
 		mywordnotes.SAVE.style.display = 'none'
 		mywordnotes.EDIT_DONE.textContent = 'Edit'
 	}
-	
+
+	function renderClear() {
+		mywordnotes.RENDER.innerHTML = ''
+		mywordnotes.RENDER.style.resize = 'none'
+		mywordnotes.RENDER.style.overflowY = 'hidden'
+	}
+
 	function renderRefresh() {
 		// enable observer to update scrollTop
 		mywordnotes.renderObserver.scrollTop = mywordnotes.RENDER.scrollTop
@@ -168,6 +174,8 @@
 		mywordnotes.RENDER.textContent =
 			'dropbox://' + mywordnotes.dbx.accessToken + '/' + mywordnotes.selected.getAttribute('name')
 		x_markup.transformElement('include', mywordnotes.RENDER)
+		mywordnotes.RENDER.style.resize = 'vertical'
+		mywordnotes.RENDER.style.overflowY = 'scroll'
 	}
 
 	function setFilelist() {

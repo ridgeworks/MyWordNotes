@@ -7,10 +7,12 @@
   <script src="mywordnotes.js"></script>
   <script src="lib/x-markup.js"></script>
 </head>
-<body style='height:100%'>
-    <h2>MyWord Notes</h2>
-	<table style='position:absolute; height:100%; width:100%;'>
-		<tr><td style='vertical-align:top; width:20%;'><table>
+<body>
+
+	<table class=notes>
+		<tr><h2>MyWord Notes</h2></tr>
+		<tr style='height:100%'>
+			<td style='vertical-align:top; width:20%;'><table>
 				<tr>
 					<td><div id="files"></div></td>
 				</tr>
@@ -34,9 +36,9 @@
 					</td>
 				</tr>
 			</table></td-->
-			<td style='vertical-align:top;'>
-				<div id='rendered' style='overflow:auto; height:500px; resize:vertical'></div>
-				<div id='filecontents' contentEditable style='overflow:auto; resize:vertical; display:none;'></div>
+			<td style='vertical-align:top; height:100%'>
+				<div id='rendered' style='overflow-x:auto; overflow-y:hidden; height:100%;'></div>
+				<div id='filecontents' contentEditable style='overflow-x:auto; overflow-y:scroll; resize:vertical; display:none;'></div>
 			</td>
 		</tr>
 	</table>
@@ -49,6 +51,10 @@
 			color: #6d6d6d;
 			text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
 			background: #e7e7e7;
+		}
+		table.notes {
+			position: absolute;
+			height: 75%;
 		}
 		button.filebutton {
 			display: block; border:none; cursor: pointer;
