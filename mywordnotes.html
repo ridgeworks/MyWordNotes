@@ -9,10 +9,12 @@
 </head>
 <body>
 
-	<table class=notes>
+	<table class=notes style='table-layout:fixed;'>
+		<colgroup><col style='width:225px; min-width:225px;'></colgroup>
 		<tr><h2>MyWord Notes</h2></tr>
-		<tr style='height:100%'>
-			<td style='vertical-align:top; width:20%;'><table>
+		<tr>
+			<td style='vertical-align:top; overflow:hidden;'>
+			<table>
 				<tr>
 					<td><div id="files"></div></td>
 				</tr>
@@ -20,7 +22,7 @@
 					<td><br/>
 						<button class=control onclick='mywordnotes.control(this)'>+</button>
 						<button class=control onclick='mywordnotes.control(this)'>-</button>
-						<button class=control id='edit_done' onclick='mywordnotes.control(this)'>Edit</button>
+						<button class=control id='edit_done' disabled onclick='mywordnotes.control(this)'>Edit</button>
 						<button class=control id='save' style='display:none;' onclick='mywordnotes.control(this)'>Save</button>
 					</td>
 				</tr>
@@ -76,7 +78,7 @@
 
 		}
 		button.control:disabled {color: #a0a0a0;}
-		button.control:active {background: lightblue;}
+		button.control:enabled:active {background: lightblue;}
 		button.control:focus {outline:none;}
 		#filecontents {border:thin solid grey; background:whitesmoke; white-space:pre-wrap; font-family:monospace;}
 		#filecontents:focus {outline:none; background:lightyellow}

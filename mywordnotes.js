@@ -55,9 +55,9 @@
 			case '+':
 				var input = document.createElement('input')
 				input.setAttribute('type', 'text')
-				input.setAttribute('size', '40')
+				input.setAttribute('size', '26')
 				input.setAttribute('value', 'Untitled..')
-				input.setAttribute('style', 'font-family:monospace; font-size: 14px')
+				input.setAttribute('style', 'font-family:monospace; font-size: 12px')
 				input.id = 'inputfilename'
 				input.addEventListener('change', addFile)
 				//input.addEventListener('cancel', function() {
@@ -133,12 +133,14 @@
 		deselect()
 		mywordnotes.selected = button
 		mywordnotes.deselectColor = button.style.backgroundColor
-		button.style.backgroundColor = 'lightBlue'	
+		button.style.backgroundColor = 'lightBlue'
+		mywordnotes.EDIT_DONE.disabled = false
 	}
 
 	function deselect() {
 		if (mywordnotes.selected) mywordnotes.selected.style.backgroundColor = mywordnotes.deselectColor
 		mywordnotes.selected = null
+		mywordnotes.EDIT_DONE.disabled = true
 		renderClear()
 	}
 
@@ -181,13 +183,13 @@
 	function setFilelist() {
 		mywordnotes.dbx.filesListFolder({path: ''})
 		.then(function(response) {
+			mywordnotes.EDIT_DONE.disabled = true
 			mywordnotes.FILES.innerHTML = ''
 			var items = response.entries
 			items.sort(function (a, b) {
 				var aname = a.name.toLowerCase(), bname = b.name.toLowerCase()
 				return (aname < bname) ? -1 : ((aname > bname) ? 1 : 0)
 			})
-			var selected 
 			items.forEach(function(item) {
 				if (item.name.endsWith('.myw')) {
 					var newbutton = fileButton(item.name)
